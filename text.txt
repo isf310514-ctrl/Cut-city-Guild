@@ -1,0 +1,1556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Cute City Guild - Free Fire Tournament App</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Rajdhani:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    /* Global Styles & Variables */
+    :root {
+      --bg-color: #08090e; --panel-bg: #121420;
+      --neon-blue: #00f0ff; --neon-purple: #9d4edd; --neon-red: #ff0055;
+      --text-main: #ffffff; --text-muted: #8b9bb4;
+      --glow-blue: 0 0 10px rgba(0, 240, 255, 0.4);
+      --glow-purple: 0 0 10px rgba(157, 78, 221, 0.4);
+      --glow-red: 0 0 10px rgba(255, 0, 85, 0.4);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; -webkit-tap-highlight-color: transparent; }
+    body { background-color: var(--bg-color); color: var(--text-main); overflow-x: hidden; padding-bottom: 80px; user-select: none; transition: background 0.3s, color 0.3s; }
+    h1, h2, h3, h4 { font-family: 'Rajdhani', sans-serif; font-weight: 700; letter-spacing: 1px; }
+    ::-webkit-scrollbar { width: 4px; } ::-webkit-scrollbar-thumb { background: var(--neon-purple); border-radius: 2px; }
+
+    /* Auth Screen */
+    #auth-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; }
+    .auth-container { background: var(--panel-bg); border: 1px solid var(--neon-purple); box-shadow: var(--glow-purple); border-radius: 16px; width: 100%; max-width: 400px; padding: 30px 24px; text-align: center; }
+    .auth-logo { font-size: 2rem; font-family: 'Rajdhani', sans-serif; color: var(--neon-red); text-shadow: var(--glow-red); margin-bottom: 10px; } .auth-logo span { color: #fff; }
+    .auth-toggle { display: flex; background: rgba(255,255,255,0.05); border-radius: 8px; margin-bottom: 25px; padding: 4px; }
+    .auth-tab { flex: 1; padding: 10px; border: none; background: transparent; color: var(--text-muted); font-weight: 600; cursor: pointer; border-radius: 6px; }
+    .auth-tab.active { background: linear-gradient(135deg, var(--neon-purple), var(--neon-red)); color: #fff; }
+    .auth-form { display: none; text-align: left; } .auth-form.active { display: block; animation: fadeIn 0.3s ease-in-out; }
+    .input-group { margin-bottom: 18px; } .input-group label { display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 6px; }
+    .input-group input, .input-group select { width: 100%; padding: 12px 15px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; outline: none; transition: all 0.3s; }
+    .input-group select option { background: var(--panel-bg); color: #fff; }
+    .input-group input:focus, .input-group select:focus { border-color: var(--neon-blue); box-shadow: var(--glow-blue); }
+    .btn-action { width: 100%; padding: 13px; background: linear-gradient(135deg, var(--neon-purple), var(--neon-red)); border: none; border-radius: 8px; color: white; font-weight: 600; cursor: pointer; font-size: 1rem; box-shadow: var(--glow-red); transition: transform 0.2s; }
+    .btn-action:active { transform: scale(0.98); }
+
+    /* Header & General UI */
+    header { background: var(--panel-bg); padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.05); position: sticky; top: 0; z-index: 99; transition: background 0.3s; }
+    .brand-name { font-size: 1.5rem; color: var(--neon-red); text-shadow: var(--glow-red); transition: color 0.3s; } .brand-name span { color: #fff; }
+    .wallet-badge { background: rgba(0,240,255,0.1); border: 1px solid var(--neon-blue); box-shadow: var(--glow-blue); padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; color: var(--neon-blue); display: flex; align-items: center; gap: 6px; cursor: pointer; }
+    .section-content { display: none; padding: 15px; } .section-content.active { display: block; animation: fadeIn 0.4s ease-in-out forwards; }
+    .section-content.profile-layout.active { display: flex; flex-direction: column; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .section-title { font-size: 1.3rem; color: var(--neon-blue); margin-bottom: 15px; display: flex; align-items: center; gap: 8px; transition: color 0.3s; }
+
+    /* Live Chat FAB Button */
+    .fab-chat {
+      position: fixed; bottom: 85px; right: 20px; width: 55px; height: 55px;
+      background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple)); border: none; border-radius: 50%;
+      color: white; font-size: 1.5rem; box-shadow: var(--glow-blue); cursor: pointer; z-index: 990;
+      display: flex; justify-content: center; align-items: center; transition: transform 0.2s;
+    }
+    .fab-chat:active { transform: scale(0.9); }
+    .msg-bubble { max-width: 80%; padding: 8px 12px; border-radius: 8px; font-size: 0.85rem; line-height: 1.4; word-break: break-word; }
+    .msg-user { background: rgba(0, 240, 255, 0.15); border: 1px solid var(--neon-blue); color: #fff; align-self: flex-end; border-bottom-right-radius: 0; }
+    .msg-admin { background: rgba(157, 78, 221, 0.15); border: 1px solid var(--neon-purple); color: #fff; align-self: flex-start; border-bottom-left-radius: 0; }
+    .msg-time { font-size: 0.65rem; color: var(--text-muted); display: block; margin-top: 4px; text-align: right; }
+
+    /* Matches & Tournaments */
+    .match-card { background: var(--panel-bg); border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.05); margin-bottom: 20px; overflow: hidden; transition: background 0.3s; }
+    .match-banner { height: 140px; background-size: cover; background-position: center; position: relative; cursor: pointer; }
+    .match-banner-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, transparent, rgba(18, 20, 32, 0.95)); }
+    .match-badge { position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.8); border: 1px solid var(--neon-blue); color: var(--neon-blue); font-size: 0.75rem; padding: 4px 10px; border-radius: 20px; font-weight: 600; }
+    .match-body { padding: 15px; } .match-name { font-size: 1.4rem; color: #fff; margin-bottom: 8px; }
+    .match-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+    .info-item { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: var(--text-muted); } .info-item i { color: var(--neon-purple); font-size: 0.95rem; } .info-item span { color: #fff; font-weight: 500; }
+    .slot-bar-container { margin-bottom: 15px; } .slot-labels { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 5px; }
+    .slot-bar { height: 6px; background: rgba(255,255,255,0.05); border-radius: 3px; overflow: hidden; } .slot-fill { height: 100%; background: linear-gradient(90deg, var(--neon-purple), var(--neon-blue)); transition: width 0.5s ease; }
+    .btn-copy-mini { background: rgba(0, 240, 255, 0.1); border: 1px solid var(--neon-blue); padding: 4px 8px; border-radius: 6px; color: var(--neon-blue); cursor: pointer; font-size: 0.75rem; }
+
+    /* Other UI Elements */
+    .winner-podium-card { background: linear-gradient(135deg, var(--panel-bg), #0c0a15); border: 1px solid #ffd700; border-radius: 12px; margin: 15px; padding: 15px; display: none; align-items: center; gap: 15px; box-shadow: 0 0 15px rgba(255, 215, 0, 0.2); }
+    .winner-avatar-frame { position: relative; width: 75px; height: 75px; flex-shrink: 0; } .winner-avatar-frame img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; border: 2px solid #ffd700; }
+    .winner-crown { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); color: #ffd700; font-size: 1.1rem; text-shadow: 0 0 5px rgba(255, 215, 0, 0.8); animation: hoverCrown 1.5s infinite alternate; }
+    .winner-info { flex-grow: 1; } .winner-title { font-size: 1.1rem; color: #fff; font-weight: 700; } .winner-meta-grid { display: flex; gap: 12px; font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; } .winner-meta-grid span strong { color: var(--neon-blue); }
+    
+    .notice-bar { background: rgba(0, 240, 255, 0.05); border-top: 1px solid rgba(0, 240, 255, 0.15); border-bottom: 1px solid rgba(0, 240, 255, 0.15); padding: 8px 15px; display: none; align-items: center; gap: 12px; font-size: 0.82rem; color: var(--neon-blue); text-shadow: var(--glow-blue); }
+    .guild-info-card { background: rgba(157, 78, 221, 0.05); border: 1px solid rgba(157, 78, 221, 0.2); border-radius: 12px; margin: 15px; padding: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; box-shadow: 0 0 157, 78, 221, 0.05); }
+    .guild-info-item { display: flex; align-items: center; gap: 10px; } .guild-info-item i { font-size: 1.5rem; color: var(--neon-blue); } .guild-info-item strong { font-family: 'Rajdhani', sans-serif; font-size: 1rem; color: #fff; }
+    
+    /* Wallet & Profile */
+    .balance-card { background: linear-gradient(135deg, var(--panel-bg), #1c1033); border: 1px solid var(--neon-purple); border-radius: 12px; padding: 25px; text-align: center; margin-bottom: 25px; box-shadow: var(--glow-purple); }
+    .balance-card .balance-amount { font-family: 'Rajdhani', sans-serif; font-size: 2.5rem; color: var(--neon-blue); text-shadow: var(--glow-blue); font-weight: 800; margin-bottom: 10px; }
+    .btn-deposit { background: linear-gradient(135deg, #10b981, #059669); border: none; padding: 10px 20px; border-radius: 20px; color: white; font-weight: 600; font-size: 0.9rem; cursor: pointer; box-shadow: 0 0 10px rgba(16, 185, 129, 0.3); transition: all 0.3s; }
+    .deposit-box { background: var(--panel-bg); border: 1px solid var(--neon-blue); border-radius: 12px; padding: 20px; margin-bottom: 25px; display: none; }
+    .payment-instruction { background: rgba(255,255,255,0.02); border-radius: 8px; padding: 12px; margin-bottom: 15px; font-size: 0.85rem; border-left: 3px solid var(--neon-purple); }
+    .user-profile-details { background: var(--panel-bg); border-radius: 12px; padding: 20px; margin-bottom: 25px; border: 1px solid rgba(255,255,255,0.05); }
+    .detail-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.9rem; } .detail-row strong { color: #fff; }
+    #verification-loader { display: none; text-align: center; padding: 20px 0; } .spinner { width: 40px; height: 40px; border: 4px solid rgba(0, 240, 255, 0.1); border-left-color: var(--neon-blue); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 15px; }
+
+    /* Tables & Lists */
+    .panel-card { background: var(--panel-bg); border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.05); padding: 15px; margin-bottom: 20px; }
+    .table-container { width: 100%; overflow-x: auto; background: rgba(0,0,0,0.2); border-radius: 8px; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; } table th { background: rgba(255,255,255,0.05); padding: 10px; text-align: left; color: var(--text-muted); } table td { padding: 10px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); color: #fff; }
+    .history-status { padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; } .status-pending { color: #ffcc00; background: rgba(255, 204, 0, 0.15); } .status-approved { color: #10b981; background: rgba(16, 185, 129, 0.15); } .status-rejected { color: #ef4444; background: rgba(239, 68, 68, 0.15); }
+    .tx-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: rgba(255,255,255,0.02); border-radius: 8px; margin-bottom: 10px; border-left: 4px solid var(--neon-purple); font-size: 0.85rem; }
+    .tx-item.add { border-left-color: #10b981; } .tx-item.deduct { border-left-color: var(--neon-red); } .tx-amount.positive { color: #10b981; font-weight:bold; } .tx-amount.negative { color: var(--neon-red); font-weight:bold; }
+    
+    .leaderboard-list { background: var(--panel-bg); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); } .leaderboard-item { display: flex; align-items: center; padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); } .rank-number { width: 30px; font-family: 'Rajdhani', sans-serif; font-size: 1.3rem; font-weight: 700; color: var(--text-muted); } .player-avatar { width: 40px; height: 40px; background: rgba(157,78,221,0.1); border: 1px solid var(--neon-purple); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 12px; } .player-name-details { flex-grow: 1; } .player-name-details strong { display: block; color:#fff; } .rank-score { font-family: 'Rajdhani', sans-serif; font-size: 1.2rem; font-weight: 700; color: var(--neon-blue); }
+
+    /* Popups & Bottom Nav */
+    .popup-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(8, 9, 14, 0.95); z-index: 2000; display: none; justify-content: center; align-items: center; padding: 20px; }
+    .popup-box { background: var(--panel-bg); border: 1px solid var(--neon-blue); box-shadow: var(--glow-blue); border-radius: 12px; width: 100%; max-width: 400px; padding: 20px; position: relative; }
+    .popup-close { position: absolute; top: 15px; right: 15px; background: none; border: none; color: var(--text-muted); font-size: 1.2rem; cursor: pointer; }
+    .popup-title { font-size: 1.2rem; color: var(--neon-blue); margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px; }
+    .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; height: 70px; background: var(--panel-bg); border-top: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-around; align-items: center; z-index: 998; }
+    .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-muted); font-size: 0.7rem; text-decoration: none; font-weight: 500; }
+    .nav-item i { font-size: 1.3rem; margin-bottom: 4px; } .nav-item.active { color: var(--neon-purple); text-shadow: var(--glow-purple); }
+
+    .tab-toggle-container { display: flex; background: rgba(255, 255, 255, 0.03); border-radius: 8px; margin-bottom: 15px; padding: 4px; }
+    .tab-btn { flex: 1; padding: 8px; border: none; background: transparent; color: var(--text-muted); font-weight: 600; font-size: 0.85rem; cursor: pointer; border-radius: 6px; }
+    .tab-btn.active { background: rgba(0, 240, 255, 0.1); color: var(--neon-blue); box-shadow: var(--glow-blue); }
+    .tab-content { display: none; } .tab-content.active { display: block; }
+    .joined-p-list { list-style: none; max-height: 180px; overflow-y: auto; padding-right: 5px; }
+    .joined-p-item { padding: 8px 12px; background: rgba(255, 255, 255, 0.02); border-radius: 6px; margin-bottom: 8px; font-size: 0.9rem; border-left: 3px solid var(--neon-blue); display: flex; justify-content: space-between; }
+    .joined-p-item strong { color: #fff; }
+
+    /* Support Center Card */
+    .support-card { display: flex; justify-content: space-between; align-items: center; background: var(--panel-bg); border: 1px solid rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 12px; margin-bottom: 12px; }
+    .support-card:hover { border-color: var(--neon-blue); box-shadow: var(--glow-blue); }
+
+    /* ================= 📢 RE-DESIGNED APP ENTRY POPUP NOTICE ================= */
+    .popup-notice-card {
+      background: #111424; /* Deep premium dark blue-gray */
+      border: 2px solid var(--neon-blue);
+      box-shadow: 0 0 25px rgba(0, 240, 255, 0.4);
+      border-radius: 24px;
+      width: 100%;
+      max-width: 400px;
+      padding: 28px;
+      font-family: 'Poppins', sans-serif;
+      animation: scaleUpNotice 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      color: #f8fafc;
+    }
+    @keyframes scaleUpNotice {
+      from { transform: scale(0.85); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .popup-notice-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 15px;
+    }
+    .popup-notice-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+      color: #fff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 1.2rem;
+    }
+    .popup-notice-title-text {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #ffffff;
+      font-family: 'Rajdhani', sans-serif;
+      text-shadow: var(--glow-blue);
+    }
+    .popup-notice-divider {
+      height: 2px;
+      background: linear-gradient(90deg, var(--neon-blue), transparent);
+      margin-bottom: 20px;
+    }
+    .popup-notice-welcome {
+      font-size: 1.05rem;
+      color: #00f0ff;
+      margin-bottom: 14px;
+      font-weight: 700;
+      font-family: 'Rajdhani', sans-serif;
+    }
+    .popup-notice-body-content {
+      color: #e2e8f0;
+      font-size: 0.92rem;
+      line-height: 1.7;
+      max-height: 280px;
+      overflow-y: auto;
+      margin-bottom: 24px;
+      white-space: pre-line;
+      padding-right: 8px;
+      text-align: left;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 15px;
+      border-radius: 12px;
+    }
+    .popup-notice-btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+      color: #ffffff;
+      border: none;
+      border-radius: 14px;
+      font-weight: bold;
+      font-size: 1rem;
+      cursor: pointer;
+      box-shadow: var(--glow-blue);
+    }
+
+    /* Accordion Style Content */
+    .collapsible-header {
+      background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 12px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer;
+    }
+    .collapsible-content {
+      display: none;
+      background: rgba(18, 20, 32, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      border-top: none;
+      border-radius: 0 0 12px 12px;
+      margin-top: -12px;
+      margin-bottom: 15px;
+      padding: 16px;
+    }
+    .collapsible-content.active {
+      display: block;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    /* Bounce Keyframe */
+    @keyframes bounce {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(-8px); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 🔐 AUTH SCREEN (LOGIN & REGISTER) -->
+  <div id="auth-screen">
+    <div class="auth-container">
+      <h2 class="auth-logo">CUTE CITY<span> GUILD</span></h2>
+      <div class="auth-toggle">
+        <button class="auth-tab active" onclick="toggleAuthTab('login')">LOGIN</button>
+        <button class="auth-tab" onclick="toggleAuthTab('register')">REGISTER</button>
+      </div>
+      <form id="login-form" class="auth-form active">
+        <div class="input-group"><label>In-Game UID (User ID)</label><input type="text" id="login-uid" required></div>
+        <div class="input-group"><label>Password</label><input type="password" id="login-password" required></div>
+        
+        <!-- 🗹 REMEMBER ME CHECKBOX -->
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 18px; font-size: 0.82rem; color: var(--text-muted);">
+          <input type="checkbox" id="login-remember" style="width: auto; cursor: pointer;">
+          <label for="login-remember" style="margin-bottom: 0; cursor: pointer; user-select: none;">আমাকে মনে রাখুন (Remember Me)</label>
+        </div>
+
+        <button type="submit" class="btn-action">ENTER LOBBY</button>
+      </form>
+      <form id="register-form" class="auth-form">
+        <div class="input-group"><label>Full Name</label><input type="text" id="reg-name" required></div>
+        <div class="input-group"><label>In-Game UID</label><input type="text" id="reg-uid" required></div>
+        <div class="input-group"><label>Mobile Number</label><input type="tel" id="reg-phone" required></div>
+        <div class="input-group"><label>Create Password</label><input type="password" id="reg-password" required></div>
+        <button type="submit" class="btn-action">CREATE ACCOUNT</button>
+      </form>
+
+      <!-- 📞 LOGIN SCREEN EXTRA HELP & COMPLAINTS HUB -->
+      <div style="margin-top: 25px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px; display: flex; justify-content: space-around; gap: 10px; width: 100%;">
+        <button type="button" class="btn-action" style="font-size: 0.8rem; padding: 8px 12px; background: rgba(0, 240, 255, 0.08); border: 1px solid var(--neon-blue); color: var(--neon-blue); box-shadow: none;" onclick="openLoginLiveChat()"><i class="fa-solid fa-comments"></i> লাইভ চ্যাট</button>
+        <button type="button" class="btn-action" style="font-size: 0.8rem; padding: 8px 12px; background: rgba(255, 0, 85, 0.08); border: 1px solid var(--neon-red); color: var(--neon-red); box-shadow: none;" onclick="openComplaintModal()"><i class="fa-solid fa-scale-balanced"></i> অভিযোগ / বিচার</button>
+      </div>
+    </div>
+  </div>
+
+  <header>
+    <div class="logo-container"><h2 class="brand-name">CUTE CITY<span> GUILD</span></h2></div>
+    <div class="wallet-badge" onclick="switchSection('profile')"><i class="fa-solid fa-money-bill-wave" style="color: #10b981;"></i> ৳ <span id="header-balance">00</span></div>
+  </header>
+
+  <!-- ================= LOBBY SECTION ================= -->
+  <div id="lobby-sec" class="section-content active">
+    <div class="winner-podium-card" id="app-winner-podium">
+      <div class="winner-avatar-frame"><i class="fa-solid fa-crown winner-crown"></i><img id="winner-img" src="" alt="winner pic"></div>
+      <div class="winner-info">
+        <div class="winner-tag">CHAMPION SHOWCASE</div><div class="winner-title" id="winner-display-name">Loading...</div>
+        <div class="winner-meta-grid"><span>UID: <strong id="winner-display-uid">---</strong></span><span>Match: <strong id="winner-display-match">---</strong></span></div>
+        <div class="winner-meta-grid"><span>Kills: <strong id="winner-display-kills">0</strong></span><span>Won: ৳ <strong id="winner-display-prize">0</strong></span></div>
+      </div>
+    </div>
+    <!-- Announcement/Marquee Text Direction - scrolls from right to left smoothly -->
+    <div class="notice-bar" id="app-notice-container"><i class="fa-solid fa-bullhorn"></i><marquee id="app-notice-text" direction="left" scrollamount="4">Notice Loading...</marquee></div>
+    
+    <div class="guild-info-card">
+      <div class="guild-info-item"><i class="fa-solid fa-shield-halved"></i><div><span>Guild UID</span><strong id="display-guild-uid">3097209694</strong></div></div>
+      <div class="guild-info-item"><i class="fa-solid fa-crown"></i><div><span>Admin FF UID</span><strong id="display-admin-uid">5219602813</strong></div></div>
+    </div>
+
+    <h3 class="section-title" style="margin-left: 15px;"><i class="fa-solid fa-gamepad"></i> Active Matches</h3>
+    <div id="tournaments-container"></div>
+  </div>
+
+  <!-- ================= MY MATCHES SECTION ================= -->
+  <div id="my-matches-sec" class="section-content">
+    <h3 class="section-title"><i class="fa-solid fa-medal"></i> My Registrations</h3>
+    <div id="joined-tournaments-container"></div>
+  </div>
+
+  <!-- ================= PROFILE & WALLET SECTION ================= -->
+  <div id="profile-sec" class="section-content profile-layout">
+    <div class="balance-card" style="order: 1;">
+      <h3>Your Current Balance</h3>
+      <div class="balance-amount">৳ <span id="profile-balance">0</span></div>
+      <div style="display: flex; gap: 10px; justify-content: center; margin-top: 15px;">
+        <button class="btn-deposit" onclick="toggleBox('deposit-form-box')"><i class="fa-solid fa-wallet"></i> ADD MONEY</button>
+        <button class="btn-deposit" style="background: linear-gradient(135deg, var(--neon-purple), var(--neon-red));" onclick="toggleBox('withdraw-form-box')"><i class="fa-solid fa-money-bill-transfer"></i> WITHDRAW</button>
+      </div>
+    </div>
+
+    <!-- ADD MONEY (DEPOSIT) BOX -->
+    <div class="deposit-box" id="deposit-form-box" style="order: 2;">
+      <h4><i class="fa-solid fa-paper-plane"></i> Add Money to Wallet</h4>
+      <div class="payment-instruction" style="display: flex; flex-direction: column; gap: 10px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); padding: 8px 12px; border-radius: 6px;">
+          <span>bKash: <strong id="payment-bkash-num">Loading...</strong></span>
+          <button type="button" class="btn-copy-mini" onclick="copyText('payment-bkash-num')"><i class="fa-regular fa-copy"></i> Copy</button>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); padding: 8px 12px; border-radius: 6px;">
+          <span>Nagad: <strong id="payment-nagad-num">Loading...</strong></span>
+          <button type="button" class="btn-copy-mini" onclick="copyText('payment-nagad-num')"><i class="fa-regular fa-copy"></i> Copy</button>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); padding: 8px 12px; border-radius: 6px;">
+          <span>Rocket: <strong id="payment-rocket-num">Loading...</strong></span>
+          <button type="button" class="btn-copy-mini" onclick="copyText('payment-rocket-num')"><i class="fa-regular fa-copy"></i> Copy</button>
+        </div>
+      </div>
+      <form id="auto-deposit-form">
+        <div class="input-group"><select id="deposit-method" required><option value="bkash">bKash (Send Money)</option><option value="nagad">Nagad (Send Money)</option><option value="rocket">Rocket (Send Money)</option></select></div>
+        <div class="input-group"><input type="tel" id="deposit-sender" placeholder="Sender Mobile Number" required></div>
+        <div class="input-group"><input type="number" id="deposit-amount" placeholder="Amount (Min 10)" required min="10"></div>
+        <div class="input-group"><input type="text" id="deposit-txid" placeholder="Transaction ID (TxID)" required style="text-transform: uppercase;"></div>
+        <button type="submit" class="btn-action" style="background: linear-gradient(135deg, #10b981, #059669);">SUBMIT</button>
+      </form>
+      <div id="verification-loader"><div class="spinner"></div></div>
+    </div>
+
+    <!-- WITHDRAW BOX -->
+    <div class="deposit-box" id="withdraw-form-box" style="order: 3;">
+      <h4><i class="fa-solid fa-money-bill-transfer"></i> Withdraw Money</h4>
+      <div style="background: rgba(255, 0, 85, 0.1); border-left: 3px solid var(--neon-red); border-radius: 6px; padding: 10px; margin-bottom: 15px; font-size: 0.85rem; color: #ff5252; font-weight: 600;">
+        <i class="fa-solid fa-triangle-exclamation"></i> অনুগ্রহ করে আপনার পার্সোনাল নাম্বার দিবেন (বিকাশ, নগদ বা রকেট)।
+      </div>
+      <form id="auto-withdraw-form">
+        <div class="input-group"><select id="withdraw-method" required><option value="bkash">bKash (Personal)</option><option value="nagad">Nagad (Personal)</option><option value="rocket">Rocket (Personal)</option></select></div>
+        <div class="input-group"><input type="tel" id="withdraw-receiver" placeholder="Personal Number" required></div>
+        <div class="input-group"><input type="number" id="withdraw-amount" placeholder="Amount (Min 50)" required min="50"></div>
+        <button type="submit" class="btn-action" style="background: linear-gradient(135deg, var(--neon-purple), var(--neon-red));">SUBMIT WITHDRAW</button>
+      </form>
+    </div>
+
+    <!-- 🎁 DAILY LOGIN BONUS SECTION -->
+    <div class="user-profile-details" id="daily-bonus-box-element" style="border-color: #ff9f43; text-align: center; order: 4;">
+      <h4 style="color: #ff9f43; margin-bottom: 12px;"><i class="fa-solid fa-gift"></i> Daily Login Reward</h4>
+      <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">Claim your daily login bonus of ৳ <span id="daily-bonus-amount-display" style="color:var(--neon-blue); font-weight:bold;">0</span> Taka!</p>
+      <button class="btn-action" id="btn-claim-daily" style="background: linear-gradient(135deg, #ff9f43, #ff5252);" onclick="claimDailyBonus()">CLAIM DAILY BONUS</button>
+    </div>
+
+    <div class="user-profile-details" id="redeem-code-box-element" style="border-color: var(--neon-purple); order: 5;">
+      <h4 style="color: var(--neon-purple); margin-bottom: 12px;"><i class="fa-solid fa-gift"></i> Redeem Gift Code</h4>
+      <form id="redeem-code-form">
+        <div class="input-group" style="margin-bottom: 12px;"><input type="text" id="redeem-code-input" placeholder="Enter Promo Code" required style="text-transform: uppercase;"></div>
+        <button type="submit" class="btn-action" style="background: linear-gradient(135deg, var(--neon-purple), var(--neon-red));">CLAIM REWARD</button>
+      </form>
+    </div>
+
+    <div class="user-profile-details" style="order: 8;">
+      <h4 style="color: var(--neon-purple); margin-bottom: 12px;"><i class="fa-solid fa-user-shield"></i> Member Profile</h4>
+      <div class="detail-row"><span>In-Game Name</span><strong id="profile-name">Loading...</strong></div>
+      <div class="detail-row"><span>In-Game UID</span><strong id="profile-uid">Loading...</strong></div>
+      <div class="detail-row"><span>Mobile Number</span><strong id="profile-phone">Loading...</strong></div>
+    </div>
+
+    <button onclick="logoutUser()" class="btn-action" style="margin-top: 25px; background: rgba(255, 0, 85, 0.1); border: 1px solid var(--neon-red); color: var(--neon-red); order: 10;">LOGOUT</button>
+  </div>
+
+  <!-- ================= HISTORY SECTION ================= -->
+  <div id="history-sec" class="section-content">
+    
+    <!-- Tab Toggle -->
+    <div class="tab-toggle-container" style="margin-bottom: 20px;">
+      <button class="tab-btn active" id="btn-history-funds" onclick="switchHistoryTab('funds')">Transactions & Funds</button>
+      <button class="tab-btn" id="btn-history-matches" onclick="switchHistoryTab('matches')">Completed Matches</button>
+    </div>
+
+    <!-- History Tab: Transactions and Funds (Collapsible Version) -->
+    <div id="history-tab-funds" class="tab-content active">
+      
+      <!-- 1. Deposit History -->
+      <div class="collapsible-header" onclick="toggleCollapsible(this)">
+        <div style="display: flex; flex-direction: column; gap: 4px; text-align: left;">
+          <h3 class="section-title" style="color: var(--neon-blue); margin-bottom: 0;"><i class="fa-solid fa-file-invoice-dollar"></i> Deposit History</h3>
+          <span style="font-size: 0.75rem; color: var(--text-muted);">ডিপোজিট বা টাকা এড করার যাবতীয় হিস্টোরি ও রিকোয়েস্ট স্ট্যাটাস</span>
+        </div>
+        <i class="fa-solid fa-chevron-down chevron-icon"></i>
+      </div>
+      <div class="collapsible-content">
+        <div class="panel-card" style="border: none; padding: 0; background: transparent; margin-bottom: 0;">
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Method</th>
+                  <th>Amount</th>
+                  <th>TxID</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="deposit-history-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Withdraw History -->
+      <div class="collapsible-header" onclick="toggleCollapsible(this)">
+        <div style="display: flex; flex-direction: column; gap: 4px; text-align: left;">
+          <h3 class="section-title" style="color: var(--neon-purple); margin-bottom: 0;"><i class="fa-solid fa-money-bill-transfer"></i> Withdraw History</h3>
+          <span style="font-size: 0.75rem; color: var(--text-muted);">উইথড্র বা টাকা উত্তোলনের হিস্টোরি ও পেমেন্ট রিকোয়েস্ট স্ট্যাটাস</span>
+        </div>
+        <i class="fa-solid fa-chevron-down chevron-icon"></i>
+      </div>
+      <div class="collapsible-content">
+        <div class="panel-card" style="border: none; padding: 0; background: transparent; margin-bottom: 0;">
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Method</th>
+                  <th>Amount</th>
+                  <th>Receiver</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="withdraw-history-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Money Ledger -->
+      <div class="collapsible-header" onclick="toggleCollapsible(this)">
+        <div style="display: flex; flex-direction: column; gap: 4px; text-align: left;">
+          <h3 class="section-title" style="color: var(--neon-red); margin-bottom: 0;"><i class="fa-solid fa-receipt"></i> Money Ledger</h3>
+          <span style="font-size: 0.75rem; color: var(--text-muted);">টাকা যোগ বা বিয়োগ হওয়ার সম্পূর্ণ বিবরণী</span>
+        </div>
+        <i class="fa-solid fa-chevron-down chevron-icon"></i>
+      </div>
+      <div class="collapsible-content">
+        <div class="panel-card" style="border: none; padding: 0; background: transparent; margin-bottom: 0;">
+          <div class="transaction-history" id="transaction-container"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- History Tab: Completed Match Archives -->
+    <div id="history-tab-matches" class="tab-content">
+      <h3 class="section-title" style="color: var(--neon-blue);"><i class="fa-solid fa-trophy"></i> Match Archives & Winners</h3>
+      <div id="completed-matches-history-container" style="display: flex; flex-direction: column; gap: 15px;"></div>
+    </div>
+
+  </div>
+
+  <!-- ================= LEADERBOARD SECTION ================= -->
+  <div id="leaderboard-sec" class="section-content">
+    <h3 class="section-title"><i class="fa-solid fa-ranking-star"></i> Global Leaderboard</h3>
+    <div class="leaderboard-list" id="leaderboard-container"></div>
+  </div>
+
+
+  <!-- ================= 📞 DEDICATED CUSTOMER SUPPORT SECTION ================= -->
+  <div id="support-page-sec" class="section-content">
+    <h3 class="section-title" style="color: var(--neon-blue);"><i class="fa-solid fa-headset"></i> Customer Support Hub</h3>
+    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px; text-align: center;">যেকোনো সমস্যায় আমাদের অফিশিয়াল সাপোর্ট চ্যানেলে যোগাযোগ করুন:</p>
+    
+    <div style="display: flex; flex-direction: column; gap: 12px; max-width: 480px; margin: 0 auto;">
+      
+      <!-- 1. WhatsApp Support -->
+      <div class="support-card" style="border-left: 4px solid #25D366; box-shadow: var(--glow-blue);">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <i class="fa-brands fa-whatsapp" style="font-size: 1.8rem; color: #25D366;"></i>
+          <div>
+            <div style="font-size: 0.95rem; font-weight: bold; color: #fff;">WhatsApp Support</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);" id="support-wa-text">https://wa.me/qr/V4GBMDPCR3IVC1</div>
+          </div>
+        </div>
+        <a href="https://wa.me/qr/V4GBMDPCR3IVC1" id="link-support-wa" target="_blank" class="btn-copy-mini" style="text-decoration: none;"><i class="fa-solid fa-arrow-up-right-from-square"></i> ওপেন করুন</a>
+      </div>
+
+      <!-- 2. Telegram Chat Support -->
+      <div class="support-card" style="border-left: 4px solid #0088cc; box-shadow: var(--glow-blue);">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <i class="fa-brands fa-telegram" style="font-size: 1.8rem; color: #0088cc;"></i>
+          <div>
+            <div style="font-size: 0.95rem; font-weight: bold; color: #fff;">Telegram Chat</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);" id="support-tg-text">https://t.me/rkkonok99</div>
+          </div>
+        </div>
+        <a href="https://t.me/rkkonok99" id="link-support-tg" target="_blank" class="btn-copy-mini" style="text-decoration: none;"><i class="fa-solid fa-arrow-up-right-from-square"></i> ওপেন করুন</a>
+      </div>
+
+      <!-- 3. Telegram Channel Support -->
+      <div class="support-card" style="border-left: 4px solid #0088cc; box-shadow: var(--glow-purple);">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <i class="fa-solid fa-bullhorn" style="font-size: 1.5rem; color: #0088cc;"></i>
+          <div>
+            <div style="font-size: 0.95rem; font-weight: bold; color: #fff;">Telegram Channel</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);" id="support-tg-channel-text">https://t.me/cutycity</div>
+          </div>
+        </div>
+        <a href="https://t.me/cutycity" id="link-support-tg-channel" target="_blank" class="btn-copy-mini" style="text-decoration: none;"><i class="fa-solid fa-arrow-up-right-from-square"></i> জয়েন করুন</a>
+      </div>
+
+      <!-- 4. Telegram Group Support -->
+      <div class="support-card" style="border-left: 4px solid #0088cc; box-shadow: var(--glow-purple);">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <i class="fa-solid fa-users" style="font-size: 1.5rem; color: #0088cc;"></i>
+          <div>
+            <div style="font-size: 0.95rem; font-weight: bold; color: #fff;">Telegram Group</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);" id="support-tg-group-text">https://t.me/+dMrd-fsJPbw3NGM1</div>
+          </div>
+        </div>
+        <a href="https://t.me/+dMrd-fsJPbw3NGM1" id="link-support-tg-group" target="_blank" class="btn-copy-mini" style="text-decoration: none;"><i class="fa-solid fa-arrow-up-right-from-square"></i> জয়েন করুন</a>
+      </div>
+
+      <!-- 5. Contact Call Support (Replaces Online Contact) -->
+      <div class="support-card" style="border-left: 4px solid var(--neon-red); box-shadow: var(--glow-red);">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <i class="fa-solid fa-phone" style="font-size: 1.6rem; color: var(--neon-red);"></i>
+          <div>
+            <div style="font-size: 0.95rem; font-weight: bold; color: #fff;">Contact Call</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">+8809696768499</div>
+          </div>
+        </div>
+        <a href="tel:+8809696768499" id="link-support-contact" class="btn-copy-mini" style="text-decoration: none;"><i class="fa-solid fa-phone-volume"></i> কল করুন</a>
+      </div>
+
+      <!-- 6. Web Live Chat (Directly Linked to Local In-App Support Chat) -->
+      <div class="support-card" style="border-left: 4px solid var(--neon-red); box-shadow: var(--glow-red);">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <i class="fa-solid fa-comments" style="font-size: 1.6rem; color: var(--neon-red);"></i>
+          <div>
+            <div style="font-size: 0.95rem; font-weight: bold; color: #fff;">Web Live Chat</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">ওয়েব ইনস্ট্যান্ট লাইভ চ্যাট</div>
+          </div>
+        </div>
+        <button type="button" class="btn-copy-mini" onclick="openLiveChat()"><i class="fa-solid fa-comments"></i> চ্যাট শুরু</button>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ================= ⚖️ COMPLAINT / REPORT POPUP MODAL ================= -->
+  <div class="popup-overlay" id="complaint-modal-overlay">
+    <div class="popup-box" style="border-color: var(--neon-red); box-shadow: var(--glow-red); max-width: 400px; width: 95%;">
+      <button class="popup-close" onclick="closePopup('complaint-modal-overlay')"><i class="fa-solid fa-xmark"></i></button>
+      <h3 class="popup-title" style="color: var(--neon-red);"><i class="fa-solid fa-scale-balanced"></i> অভিযোগ / বিচার সাবমিট</h3>
+      <form id="complaint-form" onsubmit="submitUserComplaint(event)">
+        <div class="input-group"><label>আপনার নাম (Name)</label><input type="text" id="comp-name" required></div>
+        <div class="input-group"><label>আপনার FF UID বা মোবাইল নাম্বার</label><input type="text" id="comp-uid" required></div>
+        
+        <!-- Predefined Templates / Selection Option -->
+        <div class="input-group">
+          <label>অভিযোগের বিষয় (টপিক সিলেক্ট করুন)</label>
+          <select id="comp-topic" required onchange="onComplaintTopicChange(this.value)">
+            <option value="">-- সিলেক্ট করুন --</option>
+            <option value="পাসওয়ার্ড ভুলে গেছি">পাসওয়ার্ড ভুলে গেছি</option>
+            <option value="পাসওয়ার্ড পরিবর্তন করতে চাই">পাসওয়ার্ড পরিবর্তন করতে চাই</option>
+            <option value="অথবা সরাসরি কথা বলুন এডমিনের সাথে">অথবা সরাসরি কথা বলুন এডমিনের সাথে</option>
+            <option value="অন্য সমস্যা">অন্য সমস্যা</option>
+          </select>
+        </div>
+
+        <div class="input-group"><label>অভিযোগের বিস্তারিত বিবরণ</label><textarea id="comp-message" rows="4" required style="width:100%; padding:12px; background:rgba(0,0,0,0.2); border:1px solid rgba(255,255,255,0.08); border-radius:8px; color:#fff; outline:none; resize: vertical;"></textarea></div>
+        <button type="submit" class="btn-action" style="background: linear-gradient(135deg, var(--neon-red), #ef4444); box-shadow: var(--glow-red);"><i class="fa-solid fa-paper-plane"></i> অভিযোগ জমা দিন</button>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- ================= 🏆 PREMIUM NEON SUCCESS MODAL ================= -->
+  <div class="popup-overlay" id="success-modal-overlay" style="z-index: 100000;">
+    <div class="popup-box" style="border-color: #10b981; box-shadow: 0 0 20px rgba(16, 185, 129, 0.4); text-align: center; max-width: 360px;">
+      <div style="font-size: 3.5rem; color: #10b981; margin-bottom: 15px; animation: bounce 1s infinite alternate;">
+        <i class="fa-solid fa-circle-check"></i>
+      </div>
+      <h3 style="color: #10b981; font-family: 'Rajdhani', sans-serif; font-size: 1.6rem; margin-bottom: 10px;" id="success-modal-title">CONGRATULATIONS!</h3>
+      <p style="font-size: 0.9rem; color: #f8fafc; line-height: 1.5; margin-bottom: 20px;" id="success-modal-message"></p>
+      <button class="btn-action" style="background: linear-gradient(135deg, #10b981, #059669);" onclick="closePopup('success-modal-overlay')">ওকে / চমৎকার</button>
+    </div>
+  </div>
+
+
+  <!-- ================= 🏆 PREMIUM NEON ERROR MODAL ================= -->
+  <div class="popup-overlay" id="error-modal-overlay" style="z-index: 100000;">
+    <div class="popup-box" style="border-color: #ff0055; box-shadow: 0 0 20px rgba(255, 0, 85, 0.4); text-align: center; max-width: 360px;">
+      <div style="font-size: 3.5rem; color: #ff0055; margin-bottom: 15px; animation: bounce 1s infinite alternate;"><i class="fa-solid fa-triangle-exclamation"></i></div>
+      <h3 style="color: #ff0055; font-family: 'Rajdhani', sans-serif; font-size: 1.6rem; margin-bottom: 10px;" id="error-modal-title">ERROR!</h3>
+      <p style="font-size: 0.9rem; color: #f8fafc; line-height: 1.5; margin-bottom: 20px;" id="error-modal-message"></p>
+      <button class="btn-action" style="background: linear-gradient(135deg, #ff0055, #9d4edd);" onclick="closePopup('error-modal-overlay')">ঠিক আছে</button>
+    </div>
+  </div>
+
+
+  <!-- Bottom Nav -->
+  <nav class="bottom-nav">
+    <a href="#" class="nav-item active" onclick="switchSection('lobby', this)"><i class="fa-solid fa-gamepad"></i> Lobby</a>
+    <a href="#" class="nav-item" onclick="switchSection('my-matches', this)"><i class="fa-solid fa-award"></i> Matches</a>
+    <a href="#" class="nav-item" onclick="switchSection('history', this)"><i class="fa-solid fa-clock-rotate-left"></i> History</a>
+    <a href="#" class="nav-item" onclick="switchSection('leaderboard', this)"><i class="fa-solid fa-chart-simple"></i> Rank</a>
+    <a href="#" class="nav-item" onclick="switchSection('support-page', this)"><i class="fa-solid fa-headset"></i> Support</a>
+    <a href="#" class="nav-item" onclick="switchSection('profile', this)"><i class="fa-solid fa-user"></i> Wallet</a>
+  </nav>
+
+  <!-- ================= 🎮 JOINING / POPUP OVERLAY MODAL ================= -->
+  <div class="popup-overlay" id="join-popup-overlay">
+    <div class="popup-box" style="border-color: var(--neon-blue); max-width: 400px; width: 95%;">
+      <button class="popup-close" onclick="closePopup('join-popup-overlay')"><i class="fa-solid fa-xmark"></i></button>
+      <h3 class="popup-title" style="color: var(--neon-blue);"><i class="fa-solid fa-gamepad"></i> Match Registration</h3>
+      <form id="join-match-form" onsubmit="submitJoinMatch(event)">
+        <input type="hidden" id="joining-match-id">
+        <input type="hidden" id="joining-match-fee">
+        <div id="dynamic-joining-inputs-container" style="max-height: 280px; overflow-y: auto; padding-right: 5px;"></div>
+        <button type="submit" class="btn-action" style="background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple)); margin-top: 15px;"><i class="fa-solid fa-circle-check"></i> CONFIRM REGISTRATION</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= ROOM CREDENTIALS POPUP WITH COPY BUTTONS ================= -->
+  <div class="popup-overlay" id="room-popup-overlay">
+    <div class="popup-box" style="border-color: var(--neon-purple);">
+      <button class="popup-close" onclick="closePopup('room-popup-overlay')"><i class="fa-solid fa-xmark"></i></button>
+      <h3 class="popup-title" style="color: var(--neon-purple);"><i class="fa-solid fa-key"></i> Room Details</h3>
+      
+      <!-- Pending Notification -->
+      <div id="room-pending-text" style="display: none; padding: 15px; background: rgba(157, 78, 221, 0.05); border: 1px dashed var(--neon-purple); border-radius: 8px; text-align: center; font-size: 0.88rem; color: #fff; line-height:1.5;">
+        <i class="fa-solid fa-hourglass-half" style="color: var(--neon-purple); margin-bottom: 5px; font-size: 1.2rem; display: block;"></i>
+        ম্যাচ শুরু হওয়ার ৫ মিনিট আগে রুম আইডি এবং পাসওয়ার্ড দেওয়া হবে।
+      </div>
+      
+      <!-- Live Credentials Display -->
+      <div id="room-live-content" style="display: none;">
+        <div style="background: rgba(157, 78, 221, 0.05); border: 1px dashed var(--neon-purple); border-radius: 8px; padding: 12px; text-align: center; margin-bottom: 15px;">
+          <div style="color: var(--text-muted); font-size: 0.8rem;">SLOT NUMBER</div>
+          <div style="font-size: 1.8rem; font-weight: bold; color: var(--neon-purple);" id="live-slot-number">--</div>
+        </div>
+        
+        <div style="background: rgba(0, 240, 255, 0.05); border: 1px dashed var(--neon-blue); border-radius: 8px; padding: 15px; text-align: center; margin-bottom: 15px;">
+          <div style="color: var(--text-muted); font-size: 0.8rem;">ROOM ID</div>
+          <div style="display: flex; align-items: center; justify-content: center; gap: 12px;">
+            <div style="font-size: 1.8rem; font-weight: bold; color: var(--neon-blue);" id="live-room-id">000000</div>
+            <button type="button" class="btn-copy-mini" onclick="copyText('live-room-id')"><i class="fa-regular fa-copy"></i> কপি</button>
+          </div>
+        </div>
+        
+        <div style="background: rgba(0, 240, 255, 0.05); border: 1px dashed var(--neon-blue); border-radius: 8px; padding: 15px; text-align: center;">
+          <div style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 6px;">PASSWORD</div>
+          <div style="display: flex; align-items: center; justify-content: center; gap: 12px;">
+            <div style="font-size: 1.8rem; font-weight: bold; color: var(--neon-blue);" id="live-room-pass">0000</div>
+            <button type="button" class="btn-copy-mini" onclick="copyText('live-room-pass')"><i class="fa-regular fa-copy"></i> কপি</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= 💬 IN-APP LIVE SUPPORT CHAT WINDOW MODAL ================= -->
+  <div class="popup-overlay" id="chat-popup-overlay">
+    <div class="popup-box" style="border-color: var(--neon-blue); box-shadow: var(--glow-blue); max-width: 400px; width: 95%;">
+      <button class="popup-close" onclick="closePopup('chat-popup-overlay')"><i class="fa-solid fa-xmark"></i></button>
+      <h3 class="popup-title" style="color: var(--neon-blue);"><i class="fa-solid fa-headset"></i> Live Support Chat</h3>
+      <div id="chat-box-container" style="background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 8px; height: 300px; overflow-y: auto; padding: 12px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 10px;">
+        <p style="text-align: center; color: var(--text-muted); font-size: 0.85rem; margin-top: 120px;">মেসেজ পাঠান...</p>
+      </div>
+      <form id="chat-input-form" style="display: flex; gap: 8px;">
+        <input type="text" id="chat-message-input" placeholder="মেসেজ লিখুন..." required style="flex-grow: 1; padding: 10px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 6px; color: #fff; outline: none;">
+        <button type="submit" class="btn-action" style="width: auto; padding: 10px 15px; margin: 0; background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));"><i class="fa-solid fa-paper-plane"></i></button>
+      </form>
+    </div>
+  </div>
+
+  <div class="popup-overlay" id="banner-details-popup"><div class="popup-box" style="border-color: var(--neon-blue); max-width: 450px;"><button class="popup-close" onclick="closePopup('banner-details-popup')"><i class="fa-solid fa-xmark"></i></button><h3 class="popup-title" id="banner-popup-match-title" style="color: var(--neon-blue);">Match Info</h3><div class="tab-toggle-container"><button class="tab-btn active" id="tab-p-list" onclick="togglePopupTab('players')">Joined Players</button><button class="tab-btn" id="tab-rules" onclick="togglePopupTab('rules')">Match Rules</button></div><div id="popup-tab-players" class="tab-content active"><ul class="joined-p-list" id="popup-joined-players-ul"></ul></div><div id="popup-tab-rules" class="tab-content" style="padding: 15px; background: rgba(255,255,252,0.02); border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); font-size: 0.9rem; color: var(--text-muted); min-height: 120px;"></div></div></div>
+
+  <!-- ================= 📢 CUSTOM APP ENTRY NOTICE POPUP ================= -->
+  <div class="popup-overlay" id="app-entry-popup-notice" style="z-index: 99999; display: none;">
+    <div class="popup-notice-card">
+      <div class="popup-notice-header">
+        <div class="popup-notice-icon"><i class="fa-solid fa-bell"></i></div>
+        <span class="popup-notice-title-text">Notice</span>
+      </div>
+      <div class="popup-notice-divider"></div>
+      <h4 class="popup-notice-welcome" id="popup-entry-welcome-text">WELCOME TO EXTREME TOUR 2.0</h4>
+      <div class="popup-notice-body-content" id="popup-entry-body-text"></div>
+      <button class="popup-notice-btn" onclick="closeAppEntryPopup()">Got it</button>
+    </div>
+  </div>
+
+  <!-- Float Action Live Chat Button -->
+  <button class="fab-chat" onclick="openLiveChat()"><i class="fa-solid fa-comments"></i></button>
+
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script>
+    // ⚙️ FIREBASE CONFIG
+    const firebaseConfig = {
+      apiKey: "AIzaSyCauC5OuWSt7gN9pxPf4x6i_kjkE-f3eIw",
+      authDomain: "konok-f4751.firebaseapp.com",
+      databaseURL: "https://konok-f4751-default-rtdb.firebaseio.com",
+      projectId: "konok-f4751",
+      storageBucket: "konok-f4751.firebasestorage.app",
+      messagingSenderId: "722124141284",
+      appId: "1:722124141284:web:e28b556818b8d5ee40b2f1",
+      measurementId: "G-29G30M84N8"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    let currentUser = null; let tData = {}; let pData = {};
+    let activeCountdownInterval = null;
+
+    function checkSession() {
+      const u = localStorage.getItem('user_session');
+      if (u) { currentUser = JSON.parse(u); document.getElementById('auth-screen').style.display = 'none'; initRealtimeSync(); }
+      loadSavedCredentials();
+    } 
+
+    // 🗹 LOAD SAVED CREDENTIALS (REMEMBER ME)
+    function loadSavedCredentials() {
+      const savedUid = localStorage.getItem('remembered_uid');
+      const savedPass = localStorage.getItem('remembered_password');
+      if (savedUid && savedPass) {
+        document.getElementById('login-uid').value = savedUid;
+        document.getElementById('login-password').value = savedPass;
+        document.getElementById('login-remember').checked = true;
+      }
+    }
+    
+    checkSession();
+
+    function toggleAuthTab(t) {
+      document.querySelectorAll('.auth-tab').forEach(x => x.classList.remove('active'));
+      document.querySelectorAll('.auth-form').forEach(x => x.classList.remove('active'));
+      if(t==='login'){ document.querySelectorAll('.auth-tab')[0].classList.add('active'); document.getElementById('login-form').classList.add('active'); }
+      else { document.querySelectorAll('.auth-tab')[1].classList.add('active'); document.getElementById('register-form').classList.add('active'); }
+    }
+
+    document.getElementById('register-form').addEventListener('submit', e => {
+      e.preventDefault();
+      const n = document.getElementById('reg-name').value.trim(), u = document.getElementById('reg-uid').value.trim(), p = document.getElementById('reg-phone').value.trim(), pwd = document.getElementById('reg-password').value.trim();
+      db.ref('users/'+u).once('value', s => {
+        if(s.exists()) {
+          showErrorModal('ডুপ্লিকেট অ্যাকাউন্ট!', 'এই FF UID আইডিটি দিয়ে ইতিমধ্যে অ্যাকাউন্ট খোলা হয়েছে! অনুগ্রহ করে অন্য আইডি দিন।');
+        }
+        else {
+          db.ref('app_settings/reg_bonus').once('value').then(bs => {
+            const b = parseInt(bs.val())||0; const nu = { name:n, uid:u, phone:p, password:pwd, balance:b, status:"active" };
+            db.ref('users/'+u).set(nu).then(() => {
+              if(b>0) db.ref('transactions/'+u).push().set({ type:"add", label: "Registration Bonus", amount:b, timestamp:Date.now() });
+              showSuccessModal('রেজিস্ট্রেশন সফল!', 'আপনার অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে। এবার এন্টার লবি বোতামে ক্লিক করুন।');
+              localStorage.setItem('user_session', JSON.stringify(nu)); 
+              setTimeout(() => window.location.reload(), 2000);
+            });
+          });
+        }
+      });
+    });
+
+    document.getElementById('login-form').addEventListener('submit', e => {
+      e.preventDefault(); 
+      const u = document.getElementById('login-uid').value.trim();
+      const pwd = document.getElementById('login-password').value.trim();
+      const remember = document.getElementById('login-remember').checked;
+
+      db.ref('users/'+u).once('value', s => {
+        if(s.exists() && s.val().password === pwd) { 
+          if (remember) {
+            localStorage.setItem('remembered_uid', u);
+            localStorage.setItem('remembered_password', pwd);
+          } else {
+            localStorage.removeItem('remembered_uid');
+            localStorage.removeItem('remembered_password');
+          }
+          localStorage.setItem('user_session', JSON.stringify(s.val())); 
+          window.location.reload(); 
+        }
+        else {
+          showErrorModal('লগইন ব্যর্থ!', 'ভুল UID অথবা পাসওয়ার্ড দিয়েছেন! দয়া করে সঠিক তথ্য দিয়ে পুনরায় চেষ্টা করুন।');
+        }
+      });
+    });
+
+    function logoutUser() { if(confirm('Logout?')) { localStorage.removeItem('user_session'); window.location.reload(); } }
+    function switchSection(id, el) { document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active')); if(el) el.classList.add('active'); document.querySelectorAll('.section-content').forEach(s => s.classList.remove('active')); document.getElementById(id+'-sec').classList.add('active'); }
+    function toggleBox(id) { document.querySelectorAll('.deposit-box').forEach(b => b.style.display='none'); document.getElementById(id).style.display='block'; }
+    function closePopup(id) { document.getElementById(id).style.display = 'none'; }
+
+    // 📋 clipboard copy function
+    function copyText(elementId) {
+      const element = document.getElementById(elementId);
+      if (!element) return;
+      const textToCopy = element.innerText || element.textContent;
+      
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(textToCopy).then(() => {
+          showSuccessModal('কপি সম্পন্ন হয়েছে!', `আপনার কাঙ্খিত তথ্যটি ক্লিপবোর্ডে কপি করা হয়েছে।`);
+        }).catch(err => {
+          fallbackCopyText(textToCopy);
+        });
+      } else {
+        fallbackCopyText(textToCopy);
+      }
+    }
+
+    function fallbackCopyText(text) {
+      const tempInput = document.createElement("input");
+      tempInput.value = text;
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      try {
+        document.execCommand("copy");
+        showSuccessModal('কপি সম্পন্ন হয়েছে!', `আপনার কাঙ্খিত তথ্যটি ক্লিপবোর্ডে কপি করা হয়েছে।`);
+      } catch (err) {
+        alert('কপি করতে ব্যর্থ হয়েছে!');
+      }
+      document.body.removeChild(tempInput);
+    }
+
+    // Accordion Function
+    function toggleCollapsible(header) {
+      const allHeaders = document.querySelectorAll('.collapsible-header');
+      const allContents = document.querySelectorAll('.collapsible-content');
+      const content = header.nextElementSibling;
+      const wasActive = header.classList.contains('active');
+      
+      allHeaders.forEach(h => h.classList.remove('active'));
+      allContents.forEach(c => {
+        c.classList.remove('active');
+        c.style.display = "none";
+      });
+      
+      if (!wasActive) {
+        header.classList.add('active');
+        content.classList.add('active');
+        content.style.display = "block";
+      }
+    }
+
+    // Custom Success Modal Function
+    font_weight = 600;
+    function showSuccessModal(title, message) {
+      document.getElementById('success-modal-title').textContent = title.toUpperCase();
+      document.getElementById('success-modal-message').textContent = message;
+      document.getElementById('success-modal-overlay').style.display = 'flex';
+    }
+
+    // Custom Error Modal Function
+    function showErrorModal(title, message) {
+      document.getElementById('error-modal-title').textContent = title.toUpperCase();
+      document.getElementById('error-modal-message').textContent = message;
+      document.getElementById('error-modal-overlay').style.display = 'flex';
+    }
+
+    // 📞 Open Live Chat Link from Login Screen
+    function openLoginLiveChat() {
+      if (currentUser) {
+        openLiveChat();
+      } else {
+        window.open('https://wa.me/qr/V4GBMDPCR3IVC1', '_blank');
+      }
+    }
+
+    function openComplaintModal() {
+      document.getElementById('complaint-modal-overlay').style.display = 'flex';
+    }
+
+    function onComplaintTopicChange(value) {
+      const msgArea = document.getElementById('comp-message');
+      if (value === "পাসওয়ার্ড ভুলে গেছি") {
+        msgArea.value = "আমার অ্যাকাউন্টের পাসওয়ার্ড ভুলে গেছি। অনুগ্রহ করে আমার পাসওয়ার্ডটি রিসেট/পরিবর্তন করে দিন।";
+      } else if (value === "পাসওয়ার্ড পরিবর্তন করতে চাই") {
+        msgArea.value = "আমি নিরাপত্তার স্বার্থে আমার অ্যাকাউন্টের বর্তমান পাসওয়ার্ডটি পরিবর্তন করতে চাই।";
+      } else if (value === "অথবা সরাসরি কথা বলুন এডমিনের সাথে") {
+        msgArea.value = "আমি সরাসরি এডমিনের সাথে কথা বলতে চাই।";
+        window.open('https://wa.me/qr/V4GBMDPCR3IVC1', '_blank');
+      } else {
+        msgArea.value = "";
+      }
+    }
+
+    // Submit Complaint
+    function submitUserComplaint(e) {
+      e.preventDefault();
+      const name = document.getElementById('comp-name').value.trim();
+      const uid = document.getElementById('comp-uid').value.trim();
+      const msg = document.getElementById('comp-message').value.trim();
+
+      db.ref('reports').push().set({
+        senderName: name,
+        senderUidPhone: uid,
+        message: msg,
+        timestamp: Date.now()
+      }).then(() => {
+        closePopup('complaint-modal-overlay');
+        document.getElementById('complaint-form').reset();
+        showSuccessModal('ধন্যবাদ!', 'আপনার অভিযোগটি সফলভাবে এডমিনের কাছে জমা হয়েছে।');
+      });
+    }
+
+    // OPEN IN-APP LIVE SUPPORT CHAT
+    function openLiveChat() {
+      if (!currentUser) {
+        openLoginLiveChat();
+        return;
+      }
+      document.getElementById('chat-popup-overlay').style.display = 'flex'; 
+      setTimeout(() => { 
+        const b = document.getElementById('chat-box-container'); 
+        b.scrollTop = b.scrollHeight; 
+      }, 100); 
+    }
+
+    // 🕒 LIVE COUNTDOWN TIMERS FUNCTION
+    function startCountdownTimer() {
+      if (activeCountdownInterval) clearInterval(activeCountdownInterval);
+      activeCountdownInterval = setInterval(() => {
+        const timerBoxes = document.querySelectorAll('.match-countdown-box');
+        timerBoxes.forEach(el => {
+          const matchTime = parseInt(el.getAttribute('data-match-time'));
+          if (isNaN(matchTime) || matchTime <= 0) {
+            el.innerHTML = `<span style="color: var(--text-muted);"><i class="fa-regular fa-clock"></i> Time Undefined</span>`;
+            return;
+          }
+
+          const diff = matchTime - Date.now();
+          if (diff > 0) {
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hrs = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const secs = Math.floor((diff % (1000 * 60)) / 1000);
+            
+            let timeStr = "";
+            if (days > 0) timeStr += `${days} দিন `;
+            if (hrs > 0 || days > 0) timeStr += `${hrs} ঘণ্টা `;
+            timeStr += `${mins} মিনিট ${secs} সেকেন্ড`;
+            
+            el.innerHTML = `<span style="color: #ff9f43; font-weight: 600;"><i class="fa-regular fa-clock"></i> Starts in: <strong style="color: var(--neon-blue);">${timeStr}</strong></span>`;
+          } else {
+            const postTime = Math.abs(diff);
+            if (postTime < 3600000) { // Keep Live status for 1 hour
+              el.innerHTML = `<span style="color: var(--neon-red); font-weight:bold; animation: pulse 1s infinite;"><i class="fa-solid fa-circle-dot"></i> MATCH IS LIVE</span>`;
+            } else {
+              el.innerHTML = `<span style="color: var(--text-muted);"><i class="fa-solid fa-circle-check"></i> Match Started</span>`;
+            }
+          }
+        });
+      }, 1000);
+    }
+
+    // 🎮 SUBMIT JOIN MATCH FUNCTION
+    function submitJoinMatch(e) {
+      e.preventDefault();
+      if (!currentUser) return;
+      const matchId = document.getElementById('joining-match-id').value;
+      const fee = parseInt(document.getElementById('joining-match-fee').value) || 0;
+      const match = tData[matchId];
+      if (!match) return;
+
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.style.opacity = "0.5";
+        submitBtn.innerText = "PROCESSING...";
+      }
+
+      const mt = match.matchType || "solo";
+      const teamCount = mt === "squad" ? 4 : (mt === "duo" ? 2 : 1);
+      const players = [];
+
+      for (let i = 1; i <= teamCount; i++) {
+        const nick = document.getElementById(`join-n-${i}`).value.trim();
+        const uid = document.getElementById(`join-u-${i}`).value.trim();
+        if (!nick || !uid) {
+          showErrorModal('Error!', 'দয়া করে সব খেলোয়াড়ের নাম এবং UID সঠিক তথ্য দিন।');
+          if (submitBtn) { submitBtn.disabled = false; submitBtn.style.opacity = "1"; submitBtn.innerText = "CONFIRM REGISTRATION"; }
+          return;
+        }
+        players.push({ name: nick, uid: uid });
+      }
+
+      // Check current wallet balance dynamically
+      db.ref('users/' + currentUser.uid).once('value', uSnap => {
+        const user = uSnap.val();
+        if (!user || (user.balance || 0) < fee) {
+          showErrorModal('অপর্যাপ্ত ব্যালেন্স!', `ম্যাচ এন্ট্রি ফি ৳ ${fee} টাকা। অনুগ্রহ করে ওয়ালেট থেকে ব্যালেন্স এড করুন।`);
+          if (submitBtn) { submitBtn.disabled = false; submitBtn.style.opacity = "1"; submitBtn.innerText = "CONFIRM REGISTRATION"; }
+          return;
+        }
+
+        // Check if Slot is Full
+        db.ref(`participants/${matchId}`).once('value', pSnap => {
+          const currentCount = pSnap.val() ? Object.keys(pSnap.val()).length : 0;
+          if (currentCount >= match.maxPlayers) {
+            showErrorModal('Slot Full!', 'দুঃখিত, এই টুর্নামেন্টের সকল স্লট পূর্ণ হয়ে গিয়েছে!');
+            if (submitBtn) { submitBtn.disabled = false; submitBtn.style.opacity = "1"; submitBtn.innerText = "CONFIRM REGISTRATION"; }
+            return;
+          }
+
+          // Abort if already joined
+          let alreadyJoined = false;
+          if (pSnap.exists()) {
+            const parts = pSnap.val();
+            if (parts[currentUser.uid]) alreadyJoined = true;
+            else {
+              for (let key in parts) {
+                if (parts[key].players && parts[key].players.some(p => p.uid === currentUser.uid)) {
+                  alreadyJoined = true; break;
+                }
+              }
+            }
+          }
+
+          if (alreadyJoined) {
+            showErrorModal('ইতিমধ্যে নিবন্ধিত!', 'আপনি ইতিমধ্যে এই ম্যাচে সফলভাবে অংশগ্রহণ করেছেন।');
+            closePopup('join-popup-overlay');
+            if (submitBtn) { submitBtn.disabled = false; submitBtn.style.opacity = "1"; submitBtn.innerText = "CONFIRM REGISTRATION"; }
+            return;
+          }
+
+          // Atomic Balance Transaction Deduct Block
+          db.ref('users/' + currentUser.uid).transaction(userData => {
+            if (userData) {
+              if ((userData.balance || 0) < fee) return; 
+              userData.balance = (userData.balance || 0) - fee;
+            }
+            return userData;
+          }, (txError, committed) => {
+            if (txError || !committed) {
+              showErrorModal('ত্রুটি!', 'পেমেন্ট ট্রানজেকশনে কোনো সমস্যা হয়েছে। আবার চেষ্টা করুন।');
+              if (submitBtn) { submitBtn.disabled = false; submitBtn.style.opacity = "1"; submitBtn.innerText = "CONFIRM REGISTRATION"; }
+            } else {
+              // Successfully deducted, write registration data
+              const registration = {
+                teamLeader: currentUser.uid,
+                leaderName: currentUser.name,
+                timestamp: Date.now(),
+                players: players,
+                feePaid: fee,
+                slot: currentCount + 1
+              };
+
+              db.ref(`participants/${matchId}/${currentUser.uid}`).set(registration).then(() => {
+                db.ref(`transactions/${currentUser.uid}`).push().set({
+                  type: 'join',
+                  label: `${match.code || ''} Match Registration Fee`,
+                  amount: fee,
+                  timestamp: Date.now()
+                });
+                closePopup('join-popup-overlay');
+                showSuccessModal('নিবন্ধন সফল!', `অভিনন্দন! আপনি সফলভাবে ৳ ${fee} টাকা এন্ট্রি ফির বিনিময়ে "${match.name}" ম্যাচে জয়েন করেছেন।`);
+              });
+            }
+          });
+        });
+      });
+    }
+
+    // 🔑 OPEN ROOM CREDENTIALS DYNAMICALLY WITH REAL-TIME ADMIN SYNC
+    function openRoomCredentialsModal(matchId) {
+      if (!currentUser) return;
+
+      const jp = pData[matchId] || {};
+      let isJoined = false;
+      if (jp[currentUser.uid]) { isJoined = true; }
+      else {
+        for (let regId in jp) {
+          if (jp[regId].players && Array.isArray(jp[regId].players)) {
+            if (jp[regId].players.some(p => p.uid === currentUser.uid)) { isJoined = true; break; }
+          }
+        }
+      }
+
+      if (!isJoined) {
+        showErrorModal('অ্যাক্সেস ডিনাইড!', 'আপনি এই ম্যাচে জয়েন করেননি, তাই রুম ডিটেলস দেখতে পারবেন না।');
+        return;
+      }
+
+      // Utilizes .on('value') to fetch real-time updates instantly when updated from the admin panel
+      db.ref(`tournaments/${matchId}`).on('value', s => {
+        const m = s.val();
+        if (!m) return;
+
+        db.ref(`participants/${matchId}`).once('value', pSnap => {
+          let slotNum = "--";
+          if (pSnap.exists()) {
+            const parts = pSnap.val();
+            if (parts[currentUser.uid]) {
+              slotNum = parts[currentUser.uid].slot || "--";
+            } else {
+              for (let key in parts) {
+                if (parts[key].players && parts[key].players.some(p => p.uid === currentUser.uid)) {
+                  slotNum = parts[key].slot || "--";
+                  break;
+                }
+              }
+            }
+          }
+          document.getElementById('live-slot-number').textContent = slotNum;
+
+          // এডমিন প্যানেলের সম্ভাব্য সব কী (Key) চেক করা হচ্ছে এবং টাইপ এরর এড়াতে String এ কনভার্ট করা হচ্ছে
+          const rawId = m.roomId !== undefined ? m.roomId : (m.room_id !== undefined ? m.room_id : (m.roomid !== undefined ? m.roomid : ""));
+          const rawPass = m.roomPass !== undefined ? m.roomPass : (m.room_pass !== undefined ? m.room_pass : (m.password !== undefined ? m.password : (m.roomPassword !== undefined ? m.roomPassword : "")));
+
+          const rId = String(rawId).trim();
+          const rPass = String(rawPass).trim();
+
+          // এডমিন প্যানেল থেকে আইডি ও পাসওয়ার্ড আপডেট না করা পর্যন্ত (খালি বা ০ থাকলে) আগের নোটিশটি দেখাবে
+          if (rId !== "" && rId !== "0" && rId !== "000000" && rPass !== "" && rPass !== "0" && rPass !== "0000") {
+            document.getElementById('live-room-id').textContent = rId;
+            document.getElementById('live-room-pass').textContent = rPass;
+            document.getElementById('room-pending-text').style.display = 'none';
+            document.getElementById('room-live-content').style.display = 'block';
+          } else {
+            // আপডেট না করা পর্যন্ত আগের নোটিশটিই থাকবে
+            document.getElementById('room-pending-text').style.display = 'block';
+            document.getElementById('room-live-content').style.display = 'none';
+          }
+          document.getElementById('room-popup-overlay').style.display = 'flex';
+        });
+      });
+    }
+
+    function initRealtimeSync() {
+      if(!currentUser) return;
+
+      // App Theme Auto Sync
+      db.ref('app_settings/theme').on('value', s => {
+        if(s.exists()) {
+          const t = s.val(), r = document.documentElement;
+          r.style.setProperty('--bg-color', t.bg || '#08090e'); r.style.setProperty('--panel-bg', t.panel || '#121420');
+          r.style.setProperty('--neon-blue', t.blue || '#00f0ff'); r.style.setProperty('--neon-purple', t.purple || '#9d4edd'); r.style.setProperty('--neon-red', t.red || '#ff0055');
+          r.style.setProperty('--glow-blue', `0 0 10px ${t.blue}40`); r.style.setProperty('--glow-purple', `0 0 10px ${t.purple}40`); r.style.setProperty('--glow-red', `0 0 10px ${t.red}40`);
+        }
+      });
+
+      // User & Wallet Data Sync
+      db.ref('users/'+currentUser.uid).on('value', s => {
+        if(s.exists()){ const u = s.val(); currentUser = u; document.getElementById('header-balance').textContent = u.balance||0; document.getElementById('profile-balance').textContent = u.balance||0; document.getElementById('profile-name').textContent = u.name; document.getElementById('profile-uid').textContent = u.uid; document.getElementById('profile-phone').textContent = u.phone; }
+      });
+      
+      // Transactions Sync with descriptions
+      db.ref('transactions/'+currentUser.uid).on('value', s => {
+        const c = document.getElementById('transaction-container'); c.innerHTML='';
+        if(s.exists()) {
+          Object.values(s.val()).sort((a,b)=>b.timestamp-a.timestamp).forEach(tx => {
+            let label = tx.label || "Money Received";
+            let sign = "+";
+            let ct = tx.type;
+            
+            if (ct === 'join') { label = tx.label || "Match Entry Fee"; ct = "deduct"; sign = "-"; }
+            else if (ct === 'withdraw_pending') { label = tx.label || "Withdraw Request"; ct = "deduct"; sign = "-"; }
+            else if (ct === 'withdraw_approved') { label = tx.label || "Withdraw Approved"; ct = "deduct"; sign = "-"; }
+            else if (ct === 'withdraw_rejected') { label = tx.label || "Withdraw Rejected (Refund)"; ct = "add"; sign = "+"; }
+            else if (ct === 'deposit_approved') { label = tx.label || "Deposit Approved"; ct = "add"; sign = "+"; }
+            else if (ct === 'reg_bonus') { label = tx.label || "Registration Bonus"; ct = "add"; sign = "+"; }
+
+            c.innerHTML+=`<div class="tx-item ${ct}"><div class="tx-info"><strong>${label}</strong><span>${new Date(tx.timestamp).toLocaleString()}</span></div><div class="tx-amount ${sign==='+'?'positive':'negative'}">${sign}৳ ${tx.amount}</div></div>`;
+          });
+        } else c.innerHTML='<p style="color:var(--text-muted); font-size:0.85rem;">No transactions yet.</p>';
+      });
+
+      db.ref('tournaments').on('value', s => { tData = s.val()||{}; renderT(); });
+      db.ref('participants').on('value', s => { pData = s.val()||{}; renderT(); loadCompletedMatches(); });
+      db.ref('users').orderByChild('balance').limitToLast(20).on('value', s => {
+        let uArr=[]; s.forEach(c => { uArr.push(c.val()); }); uArr.sort((a,b)=>(b.balance||0)-(a.balance||0));
+        const c = document.getElementById('leaderboard-container'); c.innerHTML='';
+        uArr.slice(0,10).forEach((u,i) => {
+          c.innerHTML+=`<div class="leaderboard-item"><div class="rank-number">${i+1}</div><div class="player-avatar"><i class="fa-solid fa-gamepad" style="color: var(--neon-purple);"></i></div><div class="player-name-details"><strong>${u.name}</strong><span>UID: ${u.uid}</span></div><div class="rank-score">৳ ${u.balance||0}</div></div>`;
+        });
+      });
+
+      db.ref('app_settings/notice').on('value', s => { const n=s.val(); if(n){ document.getElementById('app-notice-text').textContent=n; document.getElementById('app-notice-container').style.display='flex'; } else document.getElementById('app-notice-container').style.display='none'; });
+      db.ref('winner_announcement').on('value', s => { if(s.exists()) { const w=s.val(); document.getElementById('winner-img').src=w.imageUrl||''; document.getElementById('winner-display-name').textContent=w.winnerName; document.getElementById('winner-display-uid').textContent=w.winnerUid; document.getElementById('winner-display-match').textContent=w.matchName; document.getElementById('winner-display-kills').textContent=w.kills; document.getElementById('winner-display-prize').textContent=w.prize; document.getElementById('app-winner-podium').style.display='flex'; } else document.getElementById('app-winner-podium').style.display='none'; });
+      db.ref('payment_settings').on('value', s => { if(s.exists()){ const p=s.val(); document.getElementById('payment-bkash-num').textContent=p.bkash||"N/A"; document.getElementById('payment-nagad-num').textContent=p.nagad||"N/A"; document.getElementById('payment-rocket-num').textContent=p.rocket||"N/A"; } });
+      db.ref('guild_settings').on('value', s => { if(s.exists()) document.getElementById('display-guild-uid').textContent=s.val().guildUid||"3097209694"; });
+      
+      // Dynamic Customer Support Links Statically Overridden for requested configuration
+      db.ref('support_settings').on('value', s => {
+        const waLink = "https://wa.me/qr/V4GBMDPCR3IVC1";
+        const tgChat = "https://t.me/rkkonok99";
+        const tgChannel = "https://t.me/cutycity";
+        const tgGroup = "https://t.me/+dMrd-fsJPbw3NGM1";
+        const callNum = "tel:+8809696768499";
+
+        document.getElementById('support-wa-text').textContent = "https://wa.me/qr/V4GBMDPCR3IVC1";
+        document.getElementById('link-support-wa').href = waLink;
+
+        document.getElementById('support-tg-text').textContent = "https://t.me/rkkonok99";
+        document.getElementById('link-support-tg').href = tgChat;
+
+        document.getElementById('support-tg-channel-text').textContent = "https://t.me/cutycity";
+        document.getElementById('link-support-tg-channel').href = tgChannel;
+
+        document.getElementById('support-tg-group-text').textContent = "https://t.me/+dMrd-fsJPbw3NGM1";
+        document.getElementById('link-support-tg-group').href = tgGroup;
+
+        document.getElementById('link-support-contact').href = callNum;
+      });
+
+      db.ref('deposits').on('value', s => { const c=document.getElementById('deposit-history-tbody'); c.innerHTML=''; let f=false; if(s.exists()) Object.values(s.val()).filter(d=>d.userId===currentUser.uid).sort((a,b)=>b.timestamp-a.timestamp).forEach(d=>{ f=true; c.innerHTML+=`<tr><td>${d.method.toUpperCase()}</td><td>৳ ${d.amount}</td><td><code>${d.txid}</code></td><td><span class="history-status status-${d.status}">${d.status}</span></td></tr>`; }); if(!f) c.innerHTML=`<tr><td colspan="4">No requests found.</td></tr>`; });
+      db.ref('withdraws').on('value', s => { const c=document.getElementById('withdraw-history-tbody'); c.innerHTML=''; let f=false; if(s.exists()) Object.values(s.val()).filter(w=>w.userId===currentUser.uid).sort((a,b)=>b.timestamp-a.timestamp).forEach(w=>{ f=true; c.innerHTML+=`<tr><td>${w.method.toUpperCase()}</td><td>৳ ${w.amount}</td><td>${w.receiverNumber}</td><td><span class="history-status status-${w.status}">${w.status}</span></td></tr>`; }); if(!f) c.innerHTML=`<tr><td colspan="4">No requests found.</td></tr>`; });
+
+      const chatBox = document.getElementById('chat-box-container');
+      db.ref(`support_chats/${currentUser.uid}/messages`).on('value', s => { chatBox.innerHTML=''; if(s.exists()) { Object.values(s.val()).forEach(m => { chatBox.innerHTML+=`<div class="msg-bubble ${m.sender==='user'?'msg-user':'msg-admin'}"><div>${m.text}</div><span class="msg-time">${new Date(m.timestamp).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</span></div>`; }); chatBox.scrollTop=chatBox.scrollHeight; } else chatBox.innerHTML='<p style="text-align: center; color: var(--text-muted); font-size: 0.85rem; margin-top: 120px;">মেসেজ পাঠান...</p>'; });
+
+      document.getElementById('chat-input-form').addEventListener('submit', e => {
+        e.preventDefault(); const inp = document.getElementById('chat-message-input'); const txt = inp.value.trim(); if(!txt) return;
+        db.ref(`support_chats/${currentUser.uid}/messages`).push().set({ sender:"user", text:txt, timestamp:Date.now() }).then(()=>{
+          db.ref(`support_chats/${currentUser.uid}/metadata`).set({ userId:currentUser.uid, userName:currentUser.name, userPhone:currentUser.phone, lastMessage:txt, lastTimestamp:Date.now(), unreadByAdmin:true });
+          inp.value='';
+          if(!sessionStorage.getItem('auto_replied_chat')) {
+            setTimeout(() => { db.ref(`support_chats/${currentUser.uid}/messages`).push().set({ sender:"admin", text:"অটো-রিপ্লাই: আপনার মেসেজটি আমরা পেয়েছি। অ্যাডমিন খুব শীঘ্রই আপনার সাথে যোগাযোগ করবে।", timestamp:Date.now() }); sessionStorage.setItem('auto_replied_chat', 'true'); }, 1500);
+          }
+        });
+      });
+
+      db.ref('app_settings').on('value', s => { if(s.exists()){ const val = s.val(); document.getElementById('daily-bonus-amount-display').textContent = val.daily_bonus || 0; } });
+      db.ref('app_settings/popup_notice').on('value', s => { if(s.exists()){ const p = s.val(); if(p.isEnabled && !sessionStorage.getItem('app_popup_shown')){ document.getElementById('popup-entry-welcome-text').textContent = p.title || "WELCOME TO EXTREME TOUR 2.0"; document.getElementById('popup-entry-body-text').textContent = p.content || ""; document.getElementById('app-entry-popup-notice').style.display = 'flex'; } } });
+      
+      loadCompletedMatches();
+
+      // AUTO DEPOSIT REQUEST SUBMIT
+      document.getElementById('auto-deposit-form').addEventListener('submit', e => {
+        e.preventDefault();
+        const method = document.getElementById('deposit-method').value;
+        const sender = document.getElementById('deposit-sender').value.trim();
+        const amount = parseInt(document.getElementById('deposit-amount').value) || 0;
+        const txid = document.getElementById('deposit-txid').value.trim().toUpperCase();
+
+        if (amount < 10) { showErrorModal('Error', 'সর্বনিম্ন ১০ টাকা এড করতে পারবেন।'); return; }
+        document.getElementById('verification-loader').style.display = 'block';
+
+        db.ref('deposits').push().set({
+          userId: currentUser.uid,
+          userName: currentUser.name,
+          method: method,
+          senderNumber: sender,
+          amount: amount,
+          txid: txid,
+          status: 'pending',
+          timestamp: Date.now()
+        }).then(() => {
+          document.getElementById('verification-loader').style.display = 'none';
+          document.getElementById('auto-deposit-form').reset();
+          toggleBox('deposit-form-box');
+          showSuccessModal('রিকোয়েস্ট সাবমিট হয়েছে!', 'আপনার ডিপোজিট রিকোয়েস্টটি পেন্ডিং লিস্টে আছে। এডমিন চেক করে কিছুক্ষণের মধ্যে অ্যাপ্রুভ করে দিবে।');
+        });
+      });
+
+      // AUTO WITHDRAW REQUEST SUBMIT
+      document.getElementById('auto-withdraw-form').addEventListener('submit', e => {
+        e.preventDefault();
+        const method = document.getElementById('withdraw-method').value;
+        const receiver = document.getElementById('withdraw-receiver').value.trim();
+        const amount = parseInt(document.getElementById('withdraw-amount').value) || 0;
+
+        if (amount < 50) { showErrorModal('Error', 'সর্বনিম্ন ৫০ টাকা উইথড্র করতে হবে।'); return; }
+        if (amount > currentUser.balance) { showErrorModal('অপর্যাপ্ত ব্যালেন্স!', 'আপনার ওয়ালেটে পর্যাপ্ত টাকা নেই।'); return; }
+
+        db.ref('users/' + currentUser.uid).transaction(user => {
+          if (user) {
+            if ((user.balance || 0) < amount) return;
+            user.balance = (user.balance || 0) - amount;
+          }
+          return user;
+        }, (err, committed) => {
+          if (err || !committed) {
+            showErrorModal('ত্রুটি', 'উইথড্র রিকোয়েস্ট সাবমিট করা যায়নি। আবার চেষ্টা করুন।');
+          } else {
+            db.ref('withdraws').push().set({
+              userId: currentUser.uid,
+              userName: currentUser.name,
+              method: method,
+              receiverNumber: receiver,
+              amount: amount,
+              status: 'pending',
+              timestamp: Date.now()
+            }).then(() => {
+              db.ref(`transactions/${currentUser.uid}`).push().set({
+                type: 'withdraw_pending',
+                label: `Withdrawal Request (${method.toUpperCase()})`,
+                amount: amount,
+                timestamp: Date.now()
+              });
+              document.getElementById('auto-withdraw-form').reset();
+              toggleBox('withdraw-form-box');
+              showSuccessModal('রিকোয়েস্ট সফল!', `৳ ${amount} টাকার উইথড্র রিকোয়েস্ট পেন্ডিং লিস্টে জমা হয়েছে।`);
+            });
+          }
+        });
+      });
+
+      // SECURED PROMO CODE REDEEM LISTENER
+      document.getElementById('redeem-code-form').addEventListener('submit', e=>{ 
+        e.preventDefault(); 
+        const c = document.getElementById('redeem-code-input').value.trim().toUpperCase(); 
+        if (!c) return;
+
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        if (submitBtn) { submitBtn.disabled = true; submitBtn.style.opacity = "0.5"; submitBtn.innerText = "VERIFYING..."; }
+
+        db.ref('users/' + currentUser.uid).once('value').then(uS => { 
+          const u = uS.val(); 
+          if (u.redeemed_codes && u.redeemed_codes[c]) {
+            showErrorModal('ইতিমধ্যে ব্যবহৃত!', 'আপনি ইতিমধ্যে এই প্রোমো কোডটি ক্লেইম করে নিয়েছেন!');
+            if (submitBtn) { submitBtn.disabled = false; submitBtn.style.opacity = "1"; submitBtn.innerText = "CLAIM REWARD"; }
+            return;
+          } 
+          
+          db.ref('redeem_settings').once('value').then(s => { 
+            const r = s.val(); 
+            if (!r || !r.code || r.code.trim() === "" || !r.reward || parseInt(r.reward) <= 0) {
+              showErrorModal('অক্ষম করা!', 'বর্তমানে কোনো প্রোমো কোড সচল নেই।');
+              if (submitBtn) { submitBtn.disabled = false; submitBtn.style.opacity = "1"; submitBtn.innerText = "CLAIM REWARD"; }
+              return;
+            }
+            
+            if (r.code === c) { 
+              const am = parseInt(r.reward) || 0; 
+              
+              db.ref('users/' + currentUser.uid).transaction(user => {
+                if (user) {
+                  if (!user.redeemed_codes) user.redeemed_codes = {};
+                  if (user.redeemed_codes[c]) return;
+                  user.balance = (user.balance || 0) + am;
+                  user.redeemed_codes[c] = true;
+                }
+                return user;
+              }, (error, committed) => {
+                if (error || !committed) {
+                  showErrorModal('ব্যর্থ!', 'ইতিমধ্যে রিডিম করা হয়েছে বা সমস্যা হয়েছে।');
+                } else {
+                  db.ref(`transactions/${currentUser.uid}`).push().set({
+                    type: 'add', label: "Promo Code Reward", amount: am, timestamp: Date.now()
+                  }); 
+                  showSuccessModal('কংগ্রাচুলেশন!', `প্রোমো কোড সফল হয়েছে! আপনি ওয়ালেটে ৳ ${am} বোনাস পেয়েছেন।`); 
+                  document.getElementById('redeem-code-input').value = '';
+                }
+                if (submitBtn) { submitBtn.disabled = false; submitBtn.style.opacity = "1"; submitBtn.innerText = "CLAIM REWARD"; }
+              });
+            } else {
+              showErrorModal('ভুল প্রোমো কোড!', 'আপনার প্রোমো কোডটি সঠিক নয়!');
+              if (submitBtn) { submitBtn.disabled = false; submitBtn.style.opacity = "1"; submitBtn.innerText = "CLAIM REWARD"; }
+            } 
+          }); 
+        }); 
+      }); 
+    } 
+
+    function closeAppEntryPopup(){ document.getElementById('app-entry-popup-notice').style.display = 'none'; sessionStorage.setItem('app_popup_shown', 'true'); }
+
+    /* 🎁 CLAIM DAILY LOGIN BONUS */
+    function claimDailyBonus() {
+      if(!currentUser) return;
+      const btn = document.getElementById('btn-claim-daily'); 
+      btn.disabled = true;
+      btn.style.opacity = "0.5";
+
+      db.ref('app_settings/daily_bonus').once('value').then(bSnap => {
+        const bonusVal = parseInt(bSnap.val()) || 0;
+        if(bonusVal <= 0){ 
+          showErrorModal('অক্ষম করা!', 'ডেইলি বোনাস অফারটি বর্তমানে বন্ধ আছে।'); 
+          btn.disabled = false; btn.style.opacity = "1"; return; 
+        }
+
+        const todayString = new Date().toDateString();
+
+        db.ref('users/' + currentUser.uid).transaction(user => {
+          if (user) {
+            let lastClaimString = "";
+            if (user.last_daily_claim) {
+              lastClaimString = new Date(Number(user.last_daily_claim)).toDateString();
+            }
+            if (todayString === lastClaimString) return; 
+
+            user.balance = (user.balance || 0) + bonusVal;
+            user.last_daily_claim = Date.now();
+          }
+          return user;
+        }, (error, committed) => {
+          if (error) { showErrorModal('ত্রুটি!', 'বোনাস ক্লেইম করতে ব্যর্থ হয়েছে।'); } 
+          else if (!committed) { showErrorModal('আজকে ইতিমধ্যে ক্লেইমড!', 'আজকের বোনাস আপনি নিয়ে নিয়েছেন। আগামীকাল আবার চেষ্টা করুন।'); } 
+          else {
+            db.ref(`transactions/${currentUser.uid}`).push().set({ 
+              type: 'add', label: "Daily Login Bonus", amount: bonusVal, timestamp: Date.now() 
+            });
+            showSuccessModal('সফল ক্লেইম!', `আপনি ওয়ালেটে ৳ ${bonusVal} টাকা ডেইলি বোনাস পেয়েছেন।`);
+          }
+          btn.disabled = false; btn.style.opacity = "1";
+        });
+      });
+    }
+
+    function switchHistoryTab(tab) {
+      document.getElementById('btn-history-funds').classList.remove('active'); document.getElementById('btn-history-matches').classList.remove('active'); document.getElementById('history-tab-funds').classList.remove('active'); document.getElementById('history-tab-matches').classList.remove('active');
+      if (tab === 'funds') { document.getElementById('btn-history-funds').classList.add('active'); document.getElementById('history-tab-funds').classList.add('active'); } 
+      else { document.getElementById('btn-history-matches').classList.add('active'); document.getElementById('history-tab-matches').classList.add('active'); }
+    }
+
+    function checkUserParticipation(matchId, matchObj) {
+      if (!currentUser) return false; const uid = currentUser.uid;
+      if (matchId && pData[matchId]) { if (pData[matchId][uid]) return true; for (let regId in pData[matchId]) { const reg = pData[matchId][regId]; if (reg.players && Array.isArray(reg.players)) { if (reg.players.some(p => p.uid === uid)) return true; } } }
+      if (matchObj) { if (matchObj.participants) { if (matchObj.participants[uid]) return true; for (let regId in matchObj.participants) { const reg = matchObj.participants[regId]; if (reg.players && Array.isArray(reg.players)) { if (reg.players.some(p => p.uid === uid)) return true; } } } if (matchObj.players && Array.isArray(matchObj.players)) { if (matchObj.players.some(p => p.uid === uid)) return true; } if (matchObj.winner && matchObj.winner.uid === uid) { return true; } }
+      return false;
+    }
+
+    function loadCompletedMatches() {
+      db.ref('match_history').on('value', s => {
+        const container = document.getElementById('completed-matches-history-container'); container.innerHTML = '';
+        if (s.exists()) {
+          let matches = []; s.forEach(child => { let m = child.val(); m.key = child.key; matches.push(m); }); matches.reverse();
+          let userMatchesCount = 0;
+          matches.forEach(m => {
+            const matchId = m.key || m.id; if (!checkUserParticipation(matchId, m)) { return; } userMatchesCount++;
+            const winnerBlockHtml = m.winner ? `<div style="background: rgba(16, 185, 129, 0.08); border: 1px dashed #10b981; border-radius: 8px; padding: 10px; margin-top: 10px; font-size:0.82rem;"><strong style="color: #10b981;"><i class="fa-solid fa-trophy"></i> Winner:</strong> ${m.winner.name} (UID: ${m.winner.uid})<br><span style="color:var(--text-muted);">Kills: ${m.winner.kills} | Prize: ${m.winner.prize}</span></div>` : `<p style="font-size: 0.8rem; color: var(--neon-red); margin-top: 10px;"><i class="fa-solid fa-circle-info"></i> Winner details will be declared soon.</p>`;
+            container.innerHTML += `<div class="panel-card" style="border-color: rgba(255,255,255,0.05); margin-bottom: 5px;"><div style="display:flex; justify-content:space-between; align-items:center;"><h4 style="color: var(--neon-blue);">${m.code || ''} - ${m.name}</h4><span style="font-size: 0.7rem; background: var(--neon-purple); padding: 2px 6px; border-radius: 4px; color: #fff;">${(m.matchType || 'SOLO').toUpperCase()}</span></div><p style="font-size: 0.78rem; color: var(--text-muted); margin-top: 5px;">Prize Pool: ${m.prizePool} | Date: ${new Date(m.time).toLocaleDateString()}</p>${winnerBlockHtml}</div>`;
+          });
+          if (userMatchesCount === 0) { container.innerHTML = '<p style="color: var(--text-muted); text-align: center;">আপনি এখনো কোনো ম্যাচে অংশগ্রহণ করেননি।</p>'; }
+        } else { container.innerHTML = '<p style="color: var(--text-muted); text-align: center;">No completed matches found.</p>'; }
+      });
+    }
+
+    function renderT() {
+      const c = document.getElementById('tournaments-container'), jc = document.getElementById('joined-tournaments-container'); c.innerHTML=''; jc.innerHTML='';
+      let a=0, j=0;
+      for(let id in tData){
+        const m=tData[id], jp=pData[id]||{}, cp=Object.keys(jp).length;
+        let uj = false; if (jp[currentUser.uid]) { uj = true; } else { for (let regId in jp) { if (jp[regId].players && Array.isArray(jp[regId].players)) { if (jp[regId].players.some(p => p.uid === currentUser.uid)) { uj = true; break; } } } }
+        const pct=(cp/m.maxPlayers)*100, end=new Date(m.time).getTime()<Date.now();
+        
+        const cardHtml = `<div class="match-banner" onclick="openBannerDetails('${id}','${m.name}')" style="background-image:url('${m.bannerUrl||''}');">
+            <div class="match-banner-overlay"></div>
+            <span class="match-badge">${(m.matchType||"SOLO").toUpperCase()}</span>
+          </div>
+          <div class="match-body">
+            <h2 class="match-name">${m.code ? `<span style="color:var(--neon-blue); font-weight:bold;">${m.code}</span> - ` : ''}${m.name}</h2>
+            <div class="match-info-grid">
+              <div class="info-item"><i class="fa-solid fa-money-bill-wave"></i> Prize: <span>৳ ${m.prizePool}</span></div>
+              <div class="info-item"><i class="fa-solid fa-ticket"></i> Fee: <span>৳ ${m.entryFee}</span></div>
+            </div>
+            <div class="slot-bar-container">
+              <div class="slot-labels"><span>Left: ${m.maxPlayers-cp}</span><span>${cp}/${m.maxPlayers} Joined</span></div>
+              <div class="slot-bar"><div class="slot-fill" style="width:${pct}%;"></div></div>
+            </div>
+            
+            <!-- Dynamic Countdown Display -->
+            <div style="background: rgba(255,255,255,0.02); border-radius: 8px; padding: 10px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.04); display: flex; flex-direction: column; gap: 4px;">
+              <span style="font-size: 0.78rem; color: var(--text-muted);"><i class="fa-regular fa-calendar-days"></i> Match Time: <strong style="color: #fff;">${new Date(m.time).toLocaleDateString([], {month: 'short', day: 'numeric'})} at ${new Date(m.time).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}</strong></span>
+              <div class="match-countdown-box" data-match-id="${id}" data-match-time="${new Date(m.time).getTime()}" style="font-size: 0.82rem;"></div>
+            </div>
+
+            ${uj ? `<button class="btn-action" style="background:linear-gradient(135deg, var(--neon-purple), var(--neon-blue)); border: 1px solid var(--neon-blue); box-shadow: var(--glow-blue);" onclick="openRoomCredentialsModal('${id}')"><i class="fa-solid fa-key"></i> রুম ডিটেলস</button>` : 
+              (cp>=m.maxPlayers?`<button class="btn-action" style="background:#2d3142;" disabled>SLOT FULL</button>` : 
+              (end?`<button class="btn-action" style="background:#2d3142;" disabled>CLOSED</button>` : 
+              `<button class="btn-action" onclick="openJoinPopup('${id}',${m.entryFee})">ম্যাচ জয়েন - ৳ ${m.entryFee}</button>`))}
+          </div>`;
+
+        if(m.status!=='ended'){ 
+          a++; 
+          const crd=document.createElement('div'); crd.className='match-card'; 
+          crd.innerHTML= cardHtml; c.appendChild(crd); 
+        }
+        if(uj){ 
+          j++; 
+          const crd=document.createElement('div'); crd.className='match-card'; 
+          crd.innerHTML= `<div class="match-banner" onclick="openBannerDetails('${id}','${m.name}')" style="background-image:url('${m.bannerUrl||''}');">
+              <div class="match-banner-overlay"></div>
+              <span class="match-badge">REGISTERED</span>
+            </div>
+            <div class="match-body">
+              <h2 class="match-name">${m.code ? `<span style="color:var(--neon-blue); font-weight:bold;">${m.code}</span> - ` : ''}${m.name}</h2>
+              <button class="btn-action" style="background:linear-gradient(135deg, var(--neon-purple), var(--neon-blue));" onclick="openRoomCredentialsModal('${id}')"><i class="fa-solid fa-key"></i> রুম ডিটেলস</button>
+            </div>`; 
+          jc.appendChild(crd); 
+        }
+      }
+      if(!a) c.innerHTML='<p style="color:var(--text-muted); text-align: center; margin-top:20px;">কোনো সচল টুর্নামেন্ট নেই।</p>'; 
+      if(!j) jc.innerHTML='<p style="color:var(--text-muted); text-align: center; margin-top:20px;">আপনি কোন ম্যাচে জয়েন করেননি।</p>';
+      
+      startCountdownTimer();
+    }
+
+    function openJoinPopup(id, fee){ 
+      document.getElementById('joining-match-id').value=id; 
+      document.getElementById('joining-match-fee').value=fee; 
+      const mt=tData[id].matchType||"solo"; 
+      const count=mt==="squad"?4:(mt==="duo"?2:1); 
+      const cont=document.getElementById('dynamic-joining-inputs-container'); 
+      cont.innerHTML=''; 
+      
+      for(let i=1;i<=count;i++){ 
+        cont.innerHTML+=`<div style="margin-bottom:15px; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:10px;">
+          <h4 style="color:var(--neon-blue); margin-bottom:10px;">Player ${i} Details</h4>
+          <div class="input-group" style="margin-bottom: 8px;"><label>Nickname</label><input type="text" id="join-n-${i}" placeholder="Game Nickname" required ${i===1?`value="${currentUser.name}"`:""}></div>
+          <div class="input-group"><label>In-Game UID</label><input type="text" id="join-u-${i}" placeholder="Free Fire UID" required ${i===1?`value="${currentUser.uid}"`:""}></div>
+        </div>`; 
+      } 
+      document.getElementById('join-popup-overlay').style.display='flex'; 
+    }
+
+    function openBannerDetails(id, name) {
+      const match = tData[id];
+      if (!match) return;
+      document.getElementById('banner-popup-match-title').textContent = name;
+      document.getElementById('popup-tab-rules').innerHTML = match.rules || "No rules defined yet.";
+      
+      const jp = pData[id] || {};
+      const ul = document.getElementById('popup-joined-players-ul');
+      ul.innerHTML = '';
+      let count = 1;
+
+      for (let userKey in jp) {
+        const regObj = jp[userKey];
+        if (regObj.players && Array.isArray(regObj.players)) {
+          regObj.players.forEach(p => {
+            ul.innerHTML += `<li class="joined-p-item"><span>${count++}. <strong>${p.name}</strong></span><span style="color:var(--text-muted); font-size:0.75rem;">UID: ${p.uid}</span></li>`;
+          });
+        }
+      }
+      if (ul.innerHTML === '') {
+        ul.innerHTML = '<li class="joined-p-item" style="color: var(--text-muted);">No players registered yet.</li>';
+      }
+      document.getElementById('banner-details-popup').style.display = 'flex';
+      togglePopupTab('players');
+    }
+
+    function togglePopupTab(tab) {
+      document.getElementById('tab-p-list').classList.remove('active');
+      document.getElementById('tab-rules').classList.remove('active');
+      document.getElementById('popup-tab-players').classList.remove('active');
+      document.getElementById('popup-tab-rules').classList.remove('active');
+      if (tab === 'players') {
+        document.getElementById('tab-p-list').classList.add('active');
+        document.getElementById('popup-tab-players').classList.add('active');
+      } else {
+        document.getElementById('tab-rules').classList.add('active');
+        document.getElementById('popup-tab-rules').classList.add('active');
+      }
+    }
+  </script>
+</body>
+</html>
